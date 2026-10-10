@@ -24,6 +24,7 @@ export default function App() {
     () => filterProducts(products, deferredQuery),
     [products, deferredQuery],
   );
+  const isEmpty = visibleProducts.length === 0;
 
   return (
     <main className="dashboard" data-show-renders={showRenders || undefined}>
@@ -51,12 +52,15 @@ export default function App() {
         </label>
       </div>
 
-      {visibleProducts.length === 0 ? (
-        <p role="status" className="empty">
-          Tidak ada produk yang cocok dengan “{query}”.
-        </p>
-      ) : (
-        <ProductTable products={visibleProducts} onAdjustStock={adjustStock} />
+      {/* Always mounted so screen readers announce the text when it appears. */}
+      <p role="status" className="status">
+        {isEmpty ? `Tidak ada produk yang cocok dengan “${deferredQuery}”.` : null}
+      </p>
+
+      {!isEmpty && (
+        // Keyed by query so a new search starts at the top instead of keeping
+        // the previous scroll offset.
+        <ProductTable key={deferredQuery} products={visibleProducts} onAdjustStock={adjustStock} />
       )}
     </main>
   );

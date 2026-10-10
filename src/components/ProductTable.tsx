@@ -1,4 +1,4 @@
-import { useMemo, type ComponentPropsWithRef } from 'react';
+import { memo, useMemo, type ComponentPropsWithRef } from 'react';
 import { FixedSizeList, type ListChildComponentProps } from 'react-window';
 import type { Product } from '../types';
 import { ProductRow } from './ProductRow';
@@ -13,6 +13,10 @@ interface RowData {
   onAdjustStock: (id: number, delta: number) => void;
 }
 
+// Module level so its identity is stable and FixedSizeList (a PureComponent)
+// can skip rendering when nothing it receives has changed.
+const getItemKey = (index: number, data: RowData) => data.products[index].id;
+
 function Row({ index, style, data }: ListChildComponentProps<RowData>) {
   return (
     <ProductRow
@@ -26,7 +30,7 @@ function Row({ index, style, data }: ListChildComponentProps<RowData>) {
 
 // Focusable so keyboard users can scroll the list with the arrow keys.
 function Scroller(props: ComponentPropsWithRef<'div'>) {
-  return <div {...props} tabIndex={0} />;
+  return <div {...props} className="scroller" tabIndex={0} />;
 }
 
 function RowGroup(props: ComponentPropsWithRef<'div'>) {
@@ -38,7 +42,10 @@ interface ProductTableProps {
   onAdjustStock: (id: number, delta: number) => void;
 }
 
-export function ProductTable({ products, onAdjustStock }: ProductTableProps) {
+export const ProductTable = memo(function ProductTable({
+  products,
+  onAdjustStock,
+}: ProductTableProps) {
   const itemData = useMemo(() => ({ products, onAdjustStock }), [products, onAdjustStock]);
 
   return (
@@ -61,7 +68,7 @@ export function ProductTable({ products, onAdjustStock }: ProductTableProps) {
         itemCount={products.length}
         itemSize={ROW_HEIGHT}
         itemData={itemData}
-        itemKey={(index, data) => data.products[index].id}
+        itemKey={getItemKey}
         overscanCount={OVERSCAN}
         outerElementType={Scroller}
         innerElementType={RowGroup}
@@ -70,4 +77,4 @@ export function ProductTable({ products, onAdjustStock }: ProductTableProps) {
       </FixedSizeList>
     </div>
   );
-}
+});

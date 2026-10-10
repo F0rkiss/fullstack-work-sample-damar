@@ -36,7 +36,7 @@ export const ProductRow = memo(function ProductRow({
     <div role="row" aria-rowindex={rowIndex} className="row" style={style}>
       <div role="cell" className="cell cell-name">
         <span>{product.name}</span>
-        <span className="render-count" ref={renderBadge} />
+        <span className="render-count" ref={renderBadge} aria-hidden="true" />
       </div>
       <div role="cell" className="cell cell-muted">
         {product.sku}
@@ -56,7 +56,9 @@ export const ProductRow = memo(function ProductRow({
         >
           −
         </button>
-        <span className="qty">{product.stock}</span>
+        <span className="qty" aria-live="polite">
+          {product.stock}
+        </span>
         <button
           type="button"
           aria-label={`Tambah stok ${product.name}`}
